@@ -1,0 +1,6 @@
+// nodejs dev (Nestjs)
+Create API for to-do application with request limiter
+-multiple users to log in
+-add, update and remove to-do items
+-request limiter
+-user authentication
