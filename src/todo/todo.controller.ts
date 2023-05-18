@@ -3,45 +3,30 @@ import {
   Controller,
   Delete,
   Get,
-  HttpException,
-  HttpStatus,
   Param,
   Post,
   Put,
 } from '@nestjs/common';
 import { Todo } from './entities/todo.entity';
+import { TodoService } from './todo.service';
 
 @Controller('user/:userId/todo')
 export class TodoController {
-  private todos: { [userId: number]: Todo[] } = {};
+  constructor(private todoService: TodoService) {}
 
   @Get()
   findAll(@Param('userId') userId: number): Todo[] {
-    return this.todos[userId] || [];
+    return this.todoService.findAll(userId);
   }
 
   @Get(':id')
   findById(@Param('userId') userId: number, @Param('id') id: number): any {
-    const userTodos = this.todos[userId];
-    if (userTodos) {
-      const todoIndex = userTodos.findIndex((todo) => todo.id == id);
-      if (todoIndex >= 0) {
-        return userTodos[todoIndex];
-      }
-    }
-
-    throw new HttpException('Todo not found', HttpStatus.NOT_FOUND);
+    return this.todoService.findById(userId, id);
   }
 
   @Post()
   create(@Param('userId') userId: number, @Body() todo: Todo): any {
-    if (!this.todos[userId]) {
-      this.todos[userId] = [];
-    }
-    this.todos[userId].push(todo);
-    return {
-      message: 'Todo Created!',
-    };
+    return this.todoService.create(userId, todo);
   }
 
   @Put(':id')
@@ -50,33 +35,11 @@ export class TodoController {
     @Param('id') id: number,
     @Body() updatedTodo: Todo,
   ): any {
-    const userTodos = this.todos[userId];
-    if (userTodos) {
-      const todoIndex = userTodos.findIndex((todo) => todo.id == id);
-      if (todoIndex >= 0) {
-        userTodos[todoIndex] = { ...userTodos[todoIndex], ...updatedTodo };
-        return {
-          message: `Todo with id of ${id} Updated!`,
-        };
-      }
-    }
-
-    throw new HttpException('Todo not found', HttpStatus.NOT_FOUND);
+    return this.todoService.update(userId, id, updatedTodo);
   }
 
   @Delete(':id')
   delete(@Param('userId') userId: number, @Param('id') id: number): any {
-    const userTodos = this.todos[userId];
-    if (userTodos) {
-      const todoIndex = userTodos.findIndex((todo) => todo.id == id);
-      if (todoIndex >= 0) {
-        userTodos.splice(todoIndex, 1);
-        return {
-          message: `Todo with id of ${id} Updated!`,
-        };
-      }
-    }
-
-    throw new HttpException('Todo not found', HttpStatus.NOT_FOUND);
+    return this.todoService.delete(userId, id);
   }
 }
